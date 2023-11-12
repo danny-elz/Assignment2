@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
 @Configuration
 @EnableWebSecurity
 
@@ -34,15 +36,20 @@ public class SecurityConfig {
     public SecurityFilterChain securityfilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/secure/**").hasRole("USER")
-                        .requestMatchers("/", "/js/**", "/css/**", "/images/**", "/permission-denied").permitAll()
-                        .requestMatchers("/**").denyAll()
+                        .requestMatchers(new AntPathRequestMatcher("/secure/**")).hasRole("USER")
+                        .requestMatchers(new AntPathRequestMatcher("/"),
+                                new AntPathRequestMatcher("/js/**"),
+                                new AntPathRequestMatcher("/css/**"),
+                                new AntPathRequestMatcher("/images/**"),
+                                new AntPathRequestMatcher("/permission-denied")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/**")).denyAll()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll())
                 .exceptionHandling(exception -> exception.accessDeniedPage("/permission-denied"))
                 .logout(logout -> logout.permitAll())
                 .build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
